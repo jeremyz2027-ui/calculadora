@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e1e1e">
+    <style>
+        /* Estilos generales y centrado */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Contenedor de la calculadora */
+        .calculadora {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            width: 320px;
+        }
+
+        /* Pantalla de resultados */
+        .pantalla {
+            background-color: #2c2c2c;
+            color: #ffffff;
+            width: 100%;
+            height: 85px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-end;
+            overflow: hidden;
+        }
+
+        .operacion-previa {
+            color: #a0a0a0;
+            font-size: 0.95rem;
+            min-height: 20px;
+        }
+
+        .valor-actual {
+            font-size: 2.2rem;
+            font-weight: 600;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+
+        /* Cuadrícula de botones */
+        .botones {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        button {
+            height: 60px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.3rem;
+            font-weight: 500;
+            cursor: pointer;
+            background-color: #333333;
+            color: #ffffff;
+            transition: background-color 0.15s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #424242;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* Colores especiales para operadores y acciones */
+        .btn-operador {
+            background-color: #ff9f0a;
+            color: #ffffff;
+            font-size: 1.5rem;
+        }
+
+        .btn-operador:hover {
+            background-color: #ffb340;
+        }
+
+        .btn-accion {
+            background-color: #a5a5a5;
+            color: #121212;
+            font-weight: 600;
+        }
+
+        .btn-accion:hover {
+            background-color: #bdbdbd;
+        }
+
+        .btn-igual {
+            background-color: #30d158;
+            color: #121212;
+            font-weight: 700;
+        }
+
+        .btn-igual:hover {
+            background-color: #4ce070;
+        }
+
+        .span-2 {
+            grid-column: span 2;
+        }
+
+        /* --- NUEVO: Estilos del panel de personalización --- */
+        .panel-personalizacion {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 0.9rem;
+            border: 1px solid #333;
+            z-index: 100;
+        }
+
+        .panel-personalizacion label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .panel-personalizacion input[type="color"] {
+            border: none;
+            width: 32px;
+            height: 26px;
+            cursor: pointer;
+            background: none;
+        }
+
+        .panel-personalizacion select {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* Estilo 2: Tema Claro */
+        .calculadora.tema-claro {
+            background-color: #f4f4f6;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        .calculadora.tema-claro .pantalla {
+            background-color: #e2e2e7;
+            color: #121212;
+        }
+        .calculadora.tema-claro button {
+            background-color: #ffffff;
+            color: #121212;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        }
+        .calculadora.tema-claro button:hover { background-color: #eaeaea; }
+        .calculadora.tema-claro .btn-operador { background-color: #007aff; color: #fff; }
+        .calculadora.tema-claro .btn-accion { background-color: #d1d1d6; color: #121212; }
+        .calculadora.tema-claro .btn-igual { background-color: #34c759; color: #fff; }
+
+        /* Estilo 3: Tema Retro / Neón */
+        .calculadora.tema-retro {
+            background-color: #2b213a;
+            border: 2px solid #ff2a85;
+            box-shadow: 0 0 25px rgba(255, 42, 133, 0.4);
+        }
+        .calculadora.tema-retro .pantalla {
+            background-color: #161020;
+            color: #00ffcc;
+            font-family: monospace;
+        }
+        .calculadora.tema-retro button {
+            background-color: #3d2e54;
+            color: #00ffcc;
+            border-radius: 4px;
+        }
+        .calculadora.tema-retro button:hover { background-color: #503c6e; }
+        .calculadora.tema-retro .btn-operador { background-color: #ff2a85; color: #fff; }
+        .calculadora.tema-retro .btn-accion { background-color: #7b2cbf; color: #fff; }
+        .calculadora.tema-retro .btn-igual { background-color: #00ffcc; color: #161020; }
+
+    </style>
+</head>
+<body>
+    <!-- NUEVO: Panel superior derecho -->
+    <div class="panel-personalizacion">
+        <label>
+            Color de fondo:
+            <input type="color" id="selector-fondo" value="#121212">
+        </label>
+        <label>
+            Estilo:
+            <select id="selector-estilo">
+                <option value="oscuro">Oscuro (Original)</option>
+                <option value="claro">Claro / Minimalista</option>
+                <option value="retro">Retro / Neón</option>
+            </select>
+        </label>
+    </div>
+
+    <div class="calculadora">
+        <div class="pantalla">
+            <div class="operacion-previa" id="previa"></div>
+            <div class="valor-actual" id="actual">0</div>
+        </div>
+
+        <div class="botones">
+            <button class="btn-accion span-2" onclick="limpiarTodo()">C</button>
+            <button class="btn-accion" onclick="borrarUltimo()">⌫</button>
+            <button class="btn-operador" onclick="elegirOperador('÷')">÷</button>
+
+            <button onclick="agregarNumero('7')">7</button>
+            <button onclick="agregarNumero('8')">8</button>
+            <button onclick="agregarNumero('9')">9</button>
+            <button class="btn-operador" onclick="elegirOperador('×')">×</button>
+
+            <button onclick="agregarNumero('4')">4</button>
+            <button onclick="agregarNumero('5')">5</button>
+            <button onclick="agregarNumero('6')">6</button>
+            <button class="btn-operador" onclick="elegirOperador('-')">−</button>
+
+            <button onclick="agregarNumero('1')">1</button>
+            <button onclick="agregarNumero('2')">2</button>
+            <button onclick="agregarNumero('3')">3</button>
+            <button class="btn-operador" onclick="elegirOperador('+')">+</button>
+
+            <button class="span-2" onclick="agregarNumero('0')">0</button>
+            <button onclick="agregarNumero('.')">.</button>
+            <button class="btn-igual" onclick="calcular()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let valorActual = '0';
+        let valorPrevio = '';
+        let operador = null;
+        let reiniciarPantalla = false;
+
+        const pantallaActual = document.getElementById('actual');
+        const pantallaPrevia = document.getElementById('previa');
+
+        function actualizarPantalla() {
+            pantallaActual.textContent = valorActual;
+            if (operador != null) {
+                pantallaPrevia.textContent = `${valorPrevio} ${operador}`;
+            } else {
+                pantallaPrevia.textContent = '';
+            }
+        }
+
+        function agregarNumero(numero) {
+            if (valorActual === 'Error') limpiarTodo();
+            
+            if (reiniciarPantalla) {
+                valorActual = '';
+                reiniciarPantalla = false;
+            }
+
+            // Evitar múltiples puntos decimales
+            if (numero === '.' && valorActual.includes('.')) return;
+            
+            // Evitar ceros a la izquierda innecesarios
+            if (valorActual === '0' && numero !== '.') {
+                valorActual = numero;
+            } else if (valorActual === '' && numero === '.') {
+                valorActual = '0.';
+            } else {
+                valorActual += numero;
+            }
+
+            actualizarPantalla();
+        }
+
+        function elegirOperador(op) {
+            if (valorActual === 'Error') return;
+            if (valorActual === '' && valorPrevio === '') return;
+
+            if (valorPrevio !== '' && !reiniciarPantalla) {
+                calcular();
+            }
+
+            operador = op;
+            valorPrevio = valorActual;
+            reiniciarPantalla = true;
+            actualizarPantalla();
+        }
+
+        function calcular() {
+            if (operador === null || reiniciarPantalla) return;
+
+            const num1 = parseFloat(valorPrevio);
+            const num2 = parseFloat(valorActual);
+            let resultado;
+
+            switch (operador) {
+                case '+':
+                    resultado = num1 + num2;
+                    break;
+                case '-':
+                    resultado = num1 - num2;
+                    break;
+                case '×':
+                    resultado = num1 * num2;
+                    break;
+                case '÷':
+                    if (num2 === 0) {
+                        valorActual = 'Error';
+                        valorPrevio = '';
+                        operador = null;
+                        reiniciarPantalla = true;
+                        actualizarPantalla();
+                        return;
+                    }
+                    resultado = num1 / num2;
+                    break;
+                default:
+                    return;
+            }
+
+            // Redondear ligeramente para evitar errores de punto flotante (ej. 0.1 + 0.2)
+            valorActual = Math.round(resultado * 100000000) / 100000000;
+            valorActual = valorActual.toString();
+            operador = null;
+            valorPrevio = '';
+            reiniciarPantalla = true;
+            actualizarPantalla();
+        }
+
+        function limpiarTodo() {
+            valorActual = '0';
+            valorPrevio = '';
+            operador = null;
+            reiniciarPantalla = false;
+            actualizarPantalla();
+        }
+
+        function borrarUltimo() {
+            if (reiniciarPantalla || valorActual === 'Error') {
+                limpiarTodo();
+                return;
+            }
+            valorActual = valorActual.slice(0, -1);
+            if (valorActual === '' || valorActual === '-') {
+                valorActual = '0';
+            }
+            actualizarPantalla();
+        }
+
+        // Soporte para teclado físico
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') agregarNumero(e.key);
+            if (e.key === '.') agregarNumero('.');
+            if (e.key === '+' || e.key === '-') elegirOperador(e.key);
+            if (e.key === '*') elegirOperador('×');
+            if (e.key === '/') {
+                e.preventDefault(); // Evita abrir la búsqueda rápida en algunos navegadores
+                elegirOperador('÷');
+            }
+            if (e.key === 'Enter' || e.key === '=') {
+                e.preventDefault();
+                calcular();
+            }
+            if (e.key === 'Backspace') borrarUltimo();
+            if (e.key === 'Escape') limpiarTodo();
+        });
+        // --- NUEVO: Lógica del panel de personalización ---
+        const selectorFondo = document.getElementById('selector-fondo');
+        const selectorEstilo = document.getElementById('selector-estilo');
+        const contenedorCalculadora = document.querySelector('.calculadora');
+
+        selectorFondo.addEventListener('input', (e) => {
+            document.body.style.backgroundColor = e.target.value;
+        });
+
+        selectorEstilo.addEventListener('change', (e) => {
+            contenedorCalculadora.classList.remove('tema-claro', 'tema-retro');
+            if (e.target.value === 'claro') {
+                contenedorCalculadora.classList.add('tema-claro');
+            } else if (e.target.value === 'retro') {
+                contenedorCalculadora.classList.add('tema-retro');
+            }
+        });
+        // --- NUEVO: Registrar Service Worker para PWA ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .catch((err) => console.log('Error al registrar SW:', err));
+            });
+        }
+        
+    </script>
+</body>
+</html>
